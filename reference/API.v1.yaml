@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  title: API v1
+  version: '1.0'
+  description: ''
+servers:
+  - url: 'https://api.becauseofprog.fr/v1'
+paths:
+  /users:
+    get:
+      summary: Get users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: ../models/user.v1.yaml
+                required:
+                  - code
+                  - data
+      operationId: get-users
+      description: Get all the users. Requires auth and USER_WRITE permission.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+    post:
+      summary: Create user
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                  data:
+                    $ref: ../models/user.v1.yaml
+                required:
+                  - code
+                  - data
+      operationId: post-users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: "user's email adress"
+                  pattern: "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+                username:
+                  type: string
+                  description: 'username, will be taken in the profile URL'
+                  minLength: 2
+                  maxLength: 32
+                password:
+                  type: string
+                  description: "user's password (be careful to choose strong enough one)"
+              required:
+                - email
+                - username
+                - password
+      description: Create a new user. Will be asked to verify his email address.
+  '/users/{username}':
+    parameters:
+      - schema:
+          type: string
+        name: username
+        in: path
+        required: true
+    get:
+      summary: "Edit user's profile"
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                  data:
+                    $ref: ../models/user.v1.yaml
+                required:
+                  - code
+                  - data
+      operationId: get-users-username
+      description: "Get user's informations based on his username."
+    patch:
+      summary: "Edit user's profile"
+      operationId: patch-users-username
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                required:
+                  - code
+      description: "Edit the user's profile informations. Requires auth, and user has to be itself."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayname:
+                  type: string
+                  minLength: 2
+                  maxLength: 32
+                picture:
+                  type: string
+                description:
+                  type: string
+                biography:
+                  type: string
+                locations:
+                  type: string
+                socials:
+                  type: array
+                  items:
+                    $ref: ../models/social.v1.yaml
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+  '/users/{username}/permissions':
+    parameters:
+      - schema:
+          type: string
+        name: username
+        in: path
+        required: true
+    get:
+      summary: "Get user's permissions"
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                  data:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - code
+                  - data
+      operationId: get-users-username-permissions
+      description: Get the permissions a user has. Requires auth and USER_WRITE permission.
+      requestBody: {}
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+    patch:
+      summary: "Edit user's permissions"
+      operationId: patch-users-username-permissions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    default: 1
+                required:
+                  - code
+      description: 'Edit permissions a user has, to grant or limit access to resources. Requires auth and USER_WRITE permission.'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - permissions
+components:
+  schemas: {}
+  securitySchemes: {}

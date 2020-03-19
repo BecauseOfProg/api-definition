@@ -1,0 +1,48 @@
+title: User resource
+type: object
+x-tags:
+  - Users
+description: 'Users are the central part of the API. They interact with content and, in some cases, create it.'
+properties:
+  username:
+    type: string
+    description: 'username, is taken in the profile URL'
+    minLength: 2
+    maxLength: 32
+  displayname:
+    type: string
+    description: '"pretty" name to display'
+    minLength: 2
+    maxLength: 32
+  timestamp:
+    type: integer
+    description: 'unix timestamp, user creation'
+  picture:
+    type: string
+    description: "URL of the user's profile picture"
+  description:
+    type: string
+    description: "user's description, markdown format"
+  biography:
+    type: string
+    description: "user's biography, used at the end of blog posts"
+  location:
+    type: string
+    description: "user's location"
+  socials:
+    type: array
+    description: "user's social networks"
+    items:
+      $ref: ./social.v1.yaml
+  is_email_public:
+    type: boolean
+    description: "wether the user's email is public or private"
+  email:
+    type: string
+    description: "user's email, if it's public"
+required:
+  - username
+  - displayname
+  - timestamp
+  - picture
+  - is_email_public

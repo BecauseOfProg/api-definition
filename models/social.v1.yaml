@@ -1,0 +1,13 @@
+title: Social component
+type: object
+x-tags:
+  - Users
+properties:
+  id:
+    type: string
+  link:
+    type: string
+required:
+  - id
+  - link
+description: "Represents user's social network"
