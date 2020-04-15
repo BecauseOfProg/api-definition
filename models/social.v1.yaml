@@ -2,12 +2,17 @@ title: Social component
 type: object
 x-tags:
   - Users
+description: "Represents user's social network"
 properties:
-  id:
+  type:
     type: string
+    enum:
+      - twitter
+      - github
+      - reddit
+      - website
   link:
     type: string
 required:
-  - id
+  - type
   - link
-description: "Represents user's social network"
