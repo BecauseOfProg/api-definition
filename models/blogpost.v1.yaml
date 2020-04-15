@@ -1,0 +1,65 @@
+title: Blog post resources
+type: object
+x-tags:
+  - Posts
+description: 'These posts are created by BOP members in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
+properties:
+  url:
+    type: string
+    description: "post's slug, serves as url"
+  title:
+    type: string
+    description: "post's title"
+  timestamp:
+    type: integer
+    description: 'unix timestamp, post creation'
+  author:
+    $ref: ./user.v1.yaml
+  type:
+    type: string
+    description: "post's type"
+    enum:
+      - article
+      - tutorial
+      - flash
+  category:
+    type: string
+    description: "post's category, corresponding to the main theme : Apple, Web, hardware..."
+  description:
+    type: string
+    description: "a summary of post's content"
+  labels:
+    description: labels for SEO
+    type: array
+    items:
+      type: string
+  banner:
+    type: string
+    description: "post's banner"
+  article_language:
+    type: string
+    description: language in which the article is written. Backward compatibility with a previous version of the blog
+    enum:
+      - html
+      - md
+  content:
+    type: string
+    description: "post's content, format depending on the article_language value. Is not included in a many-posts request"
+  locale:
+    type: string
+    description: "post's locale"
+    enum:
+      - fr
+      - en
+required:
+  - url
+  - title
+  - timestamp
+  - author
+  - type
+  - category
+  - description
+  - labels
+  - banner
+  - article_language
+  - locale
