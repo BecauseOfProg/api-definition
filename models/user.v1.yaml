@@ -39,7 +39,7 @@ properties:
     description: "wether the user's email is public or private"
   email:
     type: string
-    description: "user's email, if it's public"
+    description: "user's email, if set to public (see `is_email_public` field)"
 required:
   - username
   - displayname

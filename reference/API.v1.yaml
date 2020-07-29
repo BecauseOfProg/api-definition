@@ -30,7 +30,7 @@ paths:
                   - code
                   - data
       operationId: get-users
-      description: Get all the users. Requires auth and USER_WRITE permission.
+      description: Get all the users. Requires auth and `USER_WRITE` permission.
       parameters:
         - schema:
             type: string
@@ -56,7 +56,7 @@ paths:
                 required:
                   - code
                   - data
-      operationId: post-users
+      operationId: create-user
       requestBody:
         content:
           application/json:
@@ -79,7 +79,10 @@ paths:
                 - email
                 - username
                 - password
-      description: Create a new user. Will be asked to verify his email address.
+      description: |-
+        **This endpoint isn't available for the moment. We're considering changing our users system.**
+
+        Create a new user. Will be asked to verify their email address.
   '/users/{username}':
     parameters:
       - schema:
@@ -88,7 +91,7 @@ paths:
         in: path
         required: true
     get:
-      summary: "Edit user's profile"
+      summary: Get user
       tags:
         - Users
       responses:
@@ -107,14 +110,14 @@ paths:
                 required:
                   - code
                   - data
-      operationId: get-users-username
-      description: "Get user's informations based on his username."
+      operationId: get-user
+      description: "Get user's informations based on their username."
     patch:
       summary: "Edit user's profile"
-      operationId: patch-users-username
+      operationId: edit-user
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
           content:
             application/json:
               schema:
@@ -182,8 +185,8 @@ paths:
                 required:
                   - code
                   - data
-      operationId: get-users-username-permissions
-      description: Get the permissions a user has. Requires auth and USER_WRITE permission.
+      operationId: get-user-permissions
+      description: Get the permissions a user has. Requires auth and `USER_WRITE` permission.
       requestBody: {}
       parameters:
         - schema:
@@ -192,10 +195,10 @@ paths:
           name: Authorization
     patch:
       summary: "Edit user's permissions"
-      operationId: patch-users-username-permissions
+      operationId: edit-user-permissions
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
           content:
             application/json:
               schema:
@@ -206,7 +209,7 @@ paths:
                     default: 1
                 required:
                   - code
-      description: 'Edit permissions a user has, to grant or limit access to resources. Requires auth and USER_WRITE permission.'
+      description: 'Edit permissions a user has, to grant or limit access to resources. Requires auth and `USER_WRITE` permission.'
       parameters:
         - schema:
             type: string
@@ -224,6 +227,73 @@ paths:
                     type: string
               required:
                 - permissions
+  /blog-posts:
+    get:
+      summary: Get all posts
+      tags: []
+      responses: {}
+      operationId: get-posts
+      description: |-
+        Get all the posts. Returns a list of blog post objects without the content.
+
+        This endpoint uses pagination.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: category
+          description: "post's category"
+        - schema:
+            type: string
+          in: query
+          name: type
+          description: "post's type (article / tutorial / flash)"
+        - schema:
+            type: string
+          in: query
+          name: search
+          description: search for articles (text inside title or description)
+    parameters: []
+    post:
+      summary: Create post
+      operationId: post-blog-posts
+      responses:
+        '200':
+          description: OK
+      description: Write a new post and publish it. Requires auth and `BLOG_WRITE` permission.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                type:
+                  type: string
+                category:
+                  type: string
+                description:
+                  type: string
+                labels:
+                  type: array
+                  items:
+                    type: string
+                banner:
+                  type: string
+                content:
+                  type: string
+                locale:
+                  type: string
+                  default: fr
+              required:
+                - title
+                - type
+                - category
+                - description
+                - labels
+                - banner
+                - content
 components:
   schemas: {}
   securitySchemes: {}
