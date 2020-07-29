@@ -36,15 +36,11 @@ properties:
   banner:
     type: string
     description: "post's banner"
-  article_language:
-    type: string
-    description: language in which the article is written. Backward compatibility with a previous version of the blog
-    enum:
-      - html
-      - md
   content:
     type: string
-    description: "post's content, format depending on the article_language value. Is not included in a many-posts request"
+    description: |-
+      post's content, mardown format.
+      Is not included in a many-posts request
   locale:
     type: string
     description: "post's locale"
@@ -61,5 +57,4 @@ required:
   - description
   - labels
   - banner
-  - article_language
   - locale

@@ -1,6 +1,6 @@
 # Permissions
 
-Permissions are here to allow users to do some actions using the API. A single user can have many permissions.
+Permissions are here to say which actions a user can do on the API. A single can have many permissions.
 
 | Name       | Resource                      | Description                          | Granted to                     |
 | ---------- | ----------------------------- | ------------------------------------ | ------------------------------ |

@@ -23,7 +23,9 @@ properties:
     description: "unix timestamp, post creation\t"
   content:
     type: string
-    description: "post's content, markdown format. Is not included in a many-posts request"
+    description: |-
+      post's content, markdown format.
+      Is not included in a many-posts request
 required:
   - title
   - url
