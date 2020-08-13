@@ -6,7 +6,7 @@ In order to do some actions, a guest must be authenticated as a user.
 
 `POST /auth`
 
-Get the token of a user, to authenticate it. Returns a `token` string and a `user` field corresponding to a [user object](../models/user.v1.yaml) including permissions.
+Get the token of a user, to authenticate it. Returns a `token` string and a `user` field corresponding to a [user object](../models/user.v2.yaml) including permissions.
 
 ### Request body
 

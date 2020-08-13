@@ -17,7 +17,7 @@ properties:
   timestamp:
     type: integer
     description: 'unix timestamp, user creation'
-  picture:
+  avatar:
     type: string
     description: "URL of the user's profile picture"
   description:
@@ -44,5 +44,5 @@ required:
   - username
   - displayname
   - timestamp
-  - picture
+  - avatar
   - is_email_public

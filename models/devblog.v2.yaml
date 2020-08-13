@@ -1,8 +1,8 @@
-title: Post resource
+title: Devblog resource
 type: object
 x-tags:
   - Posts
-description: 'Posts are created by BOP members and inform about the news around the team, the projects or anything else.'
+description: 'Devblogs are created by BOP members and inform about the news around the team, the projects or anything else.'
 properties:
   title:
     type: string
@@ -13,7 +13,7 @@ properties:
   category:
     type: string
     description: "post's category"
-  banner:
+  illustration:
     type: string
     description: "post's banner"
   author:
@@ -30,6 +30,6 @@ required:
   - title
   - url
   - category
-  - banner
+  - illustration
   - author
   - timestamp

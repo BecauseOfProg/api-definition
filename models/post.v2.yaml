@@ -1,8 +1,8 @@
-title: Blog post resources
+title: Post resource
 type: object
 x-tags:
   - Posts
-description: 'These posts are created by BOP members in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
+description: 'Posts are created by redactors in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
 properties:
   url:
     type: string
@@ -21,19 +21,19 @@ properties:
     enum:
       - article
       - tutorial
-      - flash
+      - news
   category:
     type: string
     description: "post's category, corresponding to the main theme : Apple, Web, hardware..."
   description:
     type: string
     description: "a summary of post's content"
-  labels:
+  keywords:
     description: labels for SEO
     type: array
     items:
       type: string
-  banner:
+  illustration:
     type: string
     description: "post's banner"
   content:
@@ -55,6 +55,6 @@ required:
   - type
   - category
   - description
-  - labels
-  - banner
+  - keywords
+  - illustration
   - locale
