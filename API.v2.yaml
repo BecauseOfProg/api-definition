@@ -1,0 +1,539 @@
+openapi: 3.0.0
+info:
+  title: BecauseOfProg API
+  version: '2.0'
+  description: ''
+  license:
+    name: MIT
+    url: 'https://github.com/BecauseOfProg/api-definition/blob/master/LICENSE'
+  contact:
+    name: BecauseOfProg staff
+    email: contact@becauseofprog.fr
+    url: 'https://twitter.com/BecauseOfProg'
+servers:
+  - url: 'https://api.becauseofprog.fr/v2'
+paths:
+  /users:
+    get:
+      summary: Get users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      operationId: get-users
+      description: "Get all the users.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination"
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+    post:
+      summary: Create user
+      tags:
+        - Users
+      responses:
+        '201':
+          description: Created
+      operationId: create-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: user's email adress
+                  pattern: '(?:[a-z0-9!#$%&''*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&''*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'
+                username:
+                  type: string
+                  description: 'username, will be taken in the profile URL'
+                  minLength: 2
+                  maxLength: 32
+                password:
+                  type: string
+                  description: user's password (be careful to choose strong enough one)
+              required:
+                - email
+                - username
+                - password
+      description: |-
+        **This endpoint isn't available for the moment. We're considering changing our users system.**
+
+        Create a new user. Will be asked to verify their email address.
+  '/users/{username}':
+    parameters:
+      - schema:
+          type: string
+        name: username
+        in: path
+        required: true
+    get:
+      summary: Get user
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+      operationId: get-user
+      description: Get user's informations based on their username.
+    patch:
+      summary: Edit user's profile
+      operationId: edit-user
+      responses:
+        '204':
+          description: No Content
+      description: "Edit the user's profile informations.\n\n\U0001F510 Authentication - `USER_WRITE` permission OR user himself"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayname:
+                  type: string
+                  minLength: 2
+                  maxLength: 32
+                picture:
+                  type: string
+                description:
+                  type: string
+                biography:
+                  type: string
+                locations:
+                  type: string
+                socials:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/social'
+      parameters: []
+  '/users/{username}/permissions':
+    parameters:
+      - schema:
+          type: string
+        name: username
+        in: path
+        required: true
+    get:
+      summary: Get user's permissions
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      operationId: get-user-permissions
+      description: "Get the permissions a user has.\n\n\U0001F510 Authentication - `USER_WRITE` permission"
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+    patch:
+      summary: Edit user's permissions
+      operationId: edit-user-permissions
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      description: "Edit permissions a user has, to grant or limit access to resources.\n\n\U0001F510 Authentication - `USER_WRITE` permission"
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - permissions
+  /publications:
+    get:
+      summary: Get all publications
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/publication'
+      operationId: get-publications
+      description: "Get all the publications. Returns a list of publications without the content.\n\n\U0001F4DC Pagination"
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: category
+          description: publication's category
+        - schema:
+            type: string
+          in: query
+          name: type
+          description: publication's type (article / tutorial / flash)
+        - schema:
+            type: string
+          in: query
+          name: search
+          description: search for publications (text inside title or description)
+        - schema:
+            type: string
+          in: query
+          name: author
+          description: search for publications written by a specific author (using their username)
+        - schema:
+            type: integer
+          in: query
+          name: page
+          description: page number to display (10 publications per page)
+    parameters: []
+    post:
+      summary: Create publication
+      operationId: post-publication
+      responses:
+        '201':
+          description: Created
+      description: "Write a new publication and publish it.\n\n\U0001F510 Authentication - `BLOG_WRITE` permission"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                type:
+                  type: string
+                category:
+                  type: string
+                keywords:
+                  type: string
+                illustration:
+                  type: string
+                content:
+                  type: string
+                locale:
+                  type: string
+                  default: fr
+              required:
+                - title
+                - type
+                - category
+                - keywords
+                - illustration
+                - content
+  /auth:
+    post:
+      summary: Authenticate user
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/user'
+                required:
+                  - token
+                  - user
+      operationId: post-auth
+      description: 'Get the token of a user, in order to interact with some parts of the API. To use authentication in requests that require it, add the `Authorization` header with your token inside.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: User's email address
+                password:
+                  type: string
+                  description: 'User''s password, in clear'
+              required:
+                - email
+                - password
+    get:
+      summary: Get user from token
+      operationId: get-auth
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/user'
+                  permissions:
+                    type: array
+                    items:
+                      type: string
+      description: "Get the data of a user based on his token, to re-authenticate him.\n\n\U0001F510 Authentication"
+      parameters: []
+components:
+  schemas:
+    comment:
+      title: Comment resource
+      type: object
+      description: 'Comments are made by readers on specific publications to give their opinion, suggest changes, give sources, interact with authors...'
+      properties:
+        slug:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        encoded_email:
+          type: string
+        ip:
+          type: string
+        post:
+          $ref: '#/components/schemas/publication'
+        content:
+          type: string
+        is_validated:
+          type: boolean
+        pinned:
+          type: boolean
+        timestamp:
+          type: integer
+      required:
+        - slug
+        - username
+        - email
+        - encoded_email
+        - ip
+        - post
+        - content
+        - is_validated
+        - pinned
+        - timestamp
+    user:
+      title: User resource
+      type: object
+      x-tags:
+        - Users
+      description: 'Users are the central part of the API. They interact with content and, in some cases, create it.'
+      properties:
+        username:
+          type: string
+          description: 'username, is taken in the profile URL'
+          minLength: 2
+          maxLength: 32
+        displayname:
+          type: string
+          description: '"pretty" name to display'
+          minLength: 2
+          maxLength: 32
+        timestamp:
+          type: integer
+          description: 'unix timestamp, user creation'
+        avatar:
+          type: string
+          description: URL of the user's profile picture
+        description:
+          type: string
+          description: 'user''s description, markdown format'
+        biography:
+          type: string
+          description: 'user''s biography, used at the end of blog posts'
+        location:
+          type: string
+          description: user's location
+        socials:
+          type: array
+          description: user's social networks
+          items:
+            $ref: '#/components/schemas/social'
+        is_email_public:
+          type: boolean
+          description: wether the user's email is public or private
+        email:
+          type: string
+          description: 'user''s email, if set to public (see `is_email_public` field)'
+      required:
+        - username
+        - displayname
+        - timestamp
+        - avatar
+        - is_email_public
+    social:
+      title: Social component
+      type: object
+      x-tags:
+        - Users
+      description: Represents user's social network
+      properties:
+        name:
+          type: string
+          enum:
+            - twitter
+            - github
+            - reddit
+            - website
+        value:
+          type: string
+      required:
+        - name
+        - value
+    publication:
+      title: Publication resource
+      type: object
+      x-tags:
+        - Posts
+      description: 'Publications are created by redactors in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
+      properties:
+        slug:
+          type: string
+          description: 'post''s slug, serves as url'
+        title:
+          type: string
+          description: post's title
+        timestamp:
+          type: integer
+          description: 'unix timestamp, post creation'
+        author:
+          $ref: '#/components/schemas/user'
+        type:
+          type: string
+          description: post's type
+          enum:
+            - article
+            - tutorial
+            - news
+        category:
+          type: string
+          description: 'post''s category, corresponding to the main theme : Apple, Web, hardware...'
+        description:
+          type: string
+          description: a summary of post's content
+        keywords:
+          description: labels for SEO
+          type: array
+          items:
+            type: string
+        illustration:
+          type: string
+          description: post's banner
+        content:
+          type: string
+          description: |-
+            post's content, mardown format.
+            Is not included in a many-posts request
+        locale:
+          type: string
+          description: post's locale
+          enum:
+            - fr
+            - en
+      required:
+        - slug
+        - title
+        - timestamp
+        - author
+        - type
+        - category
+        - description
+        - keywords
+        - illustration
+        - locale
+    devblog:
+      title: Devblog resource
+      type: object
+      x-tags:
+        - Posts
+      description: 'Devblogs are created by BOP members and inform about the news around the team, the projects or anything else.'
+      properties:
+        title:
+          type: string
+          description: post's title
+        slug:
+          type: string
+          description: 'post''s slug, serving as url'
+        category:
+          type: string
+          description: post's category
+        illustration:
+          type: string
+          description: post's banner
+        author:
+          $ref: '#/components/schemas/user'
+        timestamp:
+          type: integer
+          description: "unix timestamp, post creation\t"
+        content:
+          type: string
+          description: |-
+            post's content, markdown format.
+            Is not included in a many-posts request
+      required:
+        - title
+        - slug
+        - category
+        - illustration
+        - author
+        - timestamp
+  securitySchemes: {}
+  responses:
+    Error:
+      description: Full error response when the HTTP code can't give enough details
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              key:
+                type: string
+                description: Error's unique identifier
+              error:
+                type: string
+                description: Explanation of the error
+            required:
+              - key
+              - error
+  parameters:
+    Authentication:
+      name: Authentication
+      in: header
+      schema:
+        type: string
+      description: 'User''s token, got through loging-in with an email and a password'
