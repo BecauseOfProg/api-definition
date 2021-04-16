@@ -38,6 +38,16 @@ paths:
             type: string
           in: header
           name: Authorization
+        - schema:
+            type: string
+          in: query
+          name: name
+          description: search by display name or user name
+        - schema:
+            type: string
+          in: query
+          name: email
+          description: search by email
     post:
       summary: Create user
       tags:
@@ -190,6 +200,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/publication'
+          headers:
+            Pages:
+              schema:
+                type: string
+              description: Total number of pages available
       operationId: get-publications
       description: "Get all the publications. Returns a list of publications without the content.\n\n\U0001F4DC Pagination"
       parameters:
@@ -207,7 +222,7 @@ paths:
             type: string
           in: query
           name: search
-          description: search for publications (text inside title or description)
+          description: 'search for publications (text inside title, description or content)'
         - schema:
             type: string
           in: query
@@ -218,6 +233,11 @@ paths:
           in: query
           name: page
           description: page number to display (10 publications per page)
+        - schema:
+            type: string
+          in: query
+          name: locale
+          description: search for publications written in a specific lang
     parameters: []
     post:
       summary: Create publication
@@ -225,6 +245,10 @@ paths:
       responses:
         '201':
           description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
       description: "Write a new publication and publish it.\n\n\U0001F510 Authentication - `BLOG_WRITE` permission"
       requestBody:
         content:
@@ -309,6 +333,127 @@ paths:
                       type: string
       description: "Get the data of a user based on his token, to re-authenticate him.\n\n\U0001F510 Authentication"
       parameters: []
+  /comments:
+    get:
+      summary: Get all comments
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/comment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      operationId: get-comments
+      description: "Get all the comments made on every post.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination"
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: search
+          description: search for keywords in the content
+        - schema:
+            type: string
+          in: query
+          name: username
+          description: search by author name
+        - schema:
+            type: string
+          in: query
+          name: email
+          description: (only available with `USER_WRITE` permission) search by email
+        - schema:
+            type: string
+          in: query
+          name: ip
+          description: (only available with `USER_WRITE` permission) search by IP address
+  '/comments/{post_type}/{post_slug}':
+    parameters:
+      - schema:
+          type: string
+          enum:
+            - publication
+            - devblog
+        name: post_type
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: post_slug
+        in: path
+        required: true
+    get:
+      summary: Get comments on a post
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/comment'
+      operationId: get-comments-on-post
+      description: "Get comments written on a post identified by its slug\n\n\U0001F4DC Pagination"
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: search
+          description: search for keywords in the content
+        - schema:
+            type: string
+          in: query
+          name: username
+          description: search by author name
+        - schema:
+            type: string
+          in: query
+          name: email
+          description: (only available with `USER_WRITE` permission) search by email
+        - schema:
+            type: string
+          in: query
+          name: ip
+          description: (only available with `USER_WRITE` permission) search by IP address
+  /devblogs:
+    get:
+      summary: Get all devblogs
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/devblog'
+      operationId: get-devblogs
+      description: "Get all the publications. Returns a list of devblogs without the content.\n\n\U0001F4DC Pagination"
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: search
+          description: search for devblogs (text inside title or content)
+        - schema:
+            type: string
+          in: query
+          name: category
+          description: search by category
+        - schema:
+            type: string
+          in: query
+          name: author
+          description: search for devblogs written by a specific author (using their username)
 components:
   schemas:
     comment:
@@ -318,18 +463,30 @@ components:
       properties:
         slug:
           type: string
+          minLength: 2
+          maxLength: 32
         username:
           type: string
         email:
           type: string
+          maxLength: 64
+          minLength: 2
+          format: email
         encoded_email:
           type: string
         ip:
           type: string
+        post_type:
+          type: string
+          enum:
+            - publication
+            - devblog
         post:
-          $ref: '#/components/schemas/publication'
+          type: string
         content:
           type: string
+          minLength: 1
+          maxLength: 512
         is_validated:
           type: boolean
         pinned:
@@ -342,14 +499,15 @@ components:
         - email
         - encoded_email
         - ip
+        - post_type
         - post
         - content
         - is_validated
         - pinned
         - timestamp
     user:
-      title: User resource
       type: object
+      title: User resource
       x-tags:
         - Users
       description: 'Users are the central part of the API. They interact with content and, in some cases, create it.'
@@ -373,12 +531,15 @@ components:
         description:
           type: string
           description: 'user''s description, markdown format'
+          maxLength: 512
         biography:
           type: string
           description: 'user''s biography, used at the end of blog posts'
         location:
           type: string
-          description: user's location
+          description: user's location (manually given by him)
+          minLength: 0
+          maxLength: 64
         socials:
           type: array
           description: user's social networks
@@ -390,6 +551,9 @@ components:
         email:
           type: string
           description: 'user''s email, if set to public (see `is_email_public` field)'
+          minLength: 2
+          maxLength: 64
+          format: email
       required:
         - username
         - displayname
@@ -443,6 +607,16 @@ components:
         category:
           type: string
           description: 'post''s category, corresponding to the main theme : Apple, Web, hardware...'
+          enum:
+            - software
+            - security
+            - web
+            - hardware
+            - programming
+            - android
+            - linux
+            - windows
+            - apple
         description:
           type: string
           description: a summary of post's content
@@ -454,6 +628,7 @@ components:
         illustration:
           type: string
           description: post's banner
+          format: uri
         content:
           type: string
           description: |-
@@ -495,6 +670,7 @@ components:
         illustration:
           type: string
           description: post's banner
+          format: uri
         author:
           $ref: '#/components/schemas/user'
         timestamp:
@@ -524,15 +700,15 @@ components:
               key:
                 type: string
                 description: Error's unique identifier
-              error:
+              message:
                 type: string
-                description: Explanation of the error
+                description: Full text explanation of the error
             required:
               - key
-              - error
+              - message
   parameters:
     Authentication:
-      name: Authentication
+      name: Authorization
       in: header
       schema:
         type: string
