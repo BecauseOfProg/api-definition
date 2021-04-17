@@ -32,7 +32,7 @@ paths:
         '403':
           description: Forbidden
       operationId: get-users
-      description: "Get all the users.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination"
+      description: "Get all the users.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination - Max. 25 entities"
       parameters:
         - schema:
             type: string
@@ -50,8 +50,6 @@ paths:
           description: search by email
     post:
       summary: Create user
-      tags:
-        - Users
       responses:
         '201':
           description: Created
@@ -82,6 +80,8 @@ paths:
         **This endpoint isn't available for the moment. We're considering changing our users system.**
 
         Create a new user. Will be asked to verify their email address.
+      tags:
+        - Users
   '/users/{username}':
     parameters:
       - schema:
@@ -91,8 +91,6 @@ paths:
         required: true
     get:
       summary: Get user
-      tags:
-        - Users
       responses:
         '200':
           description: OK
@@ -102,6 +100,8 @@ paths:
                 $ref: '#/components/schemas/user'
       operationId: get-user
       description: Get user's informations based on their username.
+      tags:
+        - Users
     patch:
       summary: Edit user's profile
       operationId: edit-user
@@ -141,8 +141,6 @@ paths:
         required: true
     get:
       summary: Get user's permissions
-      tags:
-        - Users
       responses:
         '200':
           description: OK
@@ -159,6 +157,8 @@ paths:
             type: string
           in: header
           name: Authorization
+      tags:
+        - Users
     patch:
       summary: Edit user's permissions
       operationId: edit-user-permissions
@@ -190,7 +190,8 @@ paths:
   /publications:
     get:
       summary: Get all publications
-      tags: []
+      tags:
+        - Publications
       responses:
         '200':
           description: OK
@@ -206,7 +207,7 @@ paths:
                 type: string
               description: Total number of pages available
       operationId: get-publications
-      description: "Get all the publications. Returns a list of publications without the content.\n\n\U0001F4DC Pagination"
+      description: "Get all the publications. Returns a list of publications without the content.\n\n\U0001F4DC Pagination - Max. 10 entities"
       parameters:
         - schema:
             type: string
@@ -228,11 +229,6 @@ paths:
           in: query
           name: author
           description: search for publications written by a specific author (using their username)
-        - schema:
-            type: integer
-          in: query
-          name: page
-          description: page number to display (10 publications per page)
         - schema:
             type: string
           in: query
@@ -333,10 +329,13 @@ paths:
                       type: string
       description: "Get the data of a user based on his token, to re-authenticate him.\n\n\U0001F510 Authentication"
       parameters: []
+      tags:
+        - Users
   /comments:
     get:
       summary: Get all comments
-      tags: []
+      tags:
+        - Comments
       responses:
         '200':
           description: OK
@@ -351,7 +350,7 @@ paths:
         '403':
           description: Forbidden
       operationId: get-comments
-      description: "Get all the comments made on every post.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination"
+      description: "Get all the comments made on every post.\n\n\U0001F510 Authentication - `USER_WRITE` permission\n\U0001F4DC Pagination - Max. 25 entities"
       parameters:
         - schema:
             type: string
@@ -390,7 +389,8 @@ paths:
         required: true
     get:
       summary: Get comments on a post
-      tags: []
+      tags:
+        - Comments
       responses:
         '200':
           description: OK
@@ -401,7 +401,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/comment'
       operationId: get-comments-on-post
-      description: "Get comments written on a post identified by its slug\n\n\U0001F4DC Pagination"
+      description: "Get comments written on a post identified by its slug\n\n\U0001F4DC Pagination - Max. 25 entities"
       parameters:
         - schema:
             type: string
@@ -426,7 +426,8 @@ paths:
   /devblogs:
     get:
       summary: Get all devblogs
-      tags: []
+      tags:
+        - Devblogs
       responses:
         '200':
           description: OK
@@ -437,7 +438,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/devblog'
       operationId: get-devblogs
-      description: "Get all the publications. Returns a list of devblogs without the content.\n\n\U0001F4DC Pagination"
+      description: "Get all the publications. Returns a list of devblogs without the content.\n\n\U0001F4DC Pagination - Max. 10 entities"
       parameters:
         - schema:
             type: string
@@ -505,11 +506,11 @@ components:
         - is_validated
         - pinned
         - timestamp
+      x-tags:
+        - Comments
     user:
       type: object
       title: User resource
-      x-tags:
-        - Users
       description: 'Users are the central part of the API. They interact with content and, in some cases, create it.'
       properties:
         username:
@@ -560,6 +561,8 @@ components:
         - timestamp
         - avatar
         - is_email_public
+      x-tags:
+        - Users
     social:
       title: Social component
       type: object
@@ -582,8 +585,6 @@ components:
     publication:
       title: Publication resource
       type: object
-      x-tags:
-        - Posts
       description: 'Publications are created by redactors in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
       properties:
         slug:
@@ -651,11 +652,11 @@ components:
         - keywords
         - illustration
         - locale
+      x-tags:
+        - Publications
     devblog:
       title: Devblog resource
       type: object
-      x-tags:
-        - Posts
       description: 'Devblogs are created by BOP members and inform about the news around the team, the projects or anything else.'
       properties:
         title:
@@ -688,6 +689,8 @@ components:
         - illustration
         - author
         - timestamp
+      x-tags:
+        - Devblogs
   securitySchemes: {}
   responses:
     Error:
@@ -713,3 +716,8 @@ components:
       schema:
         type: string
       description: 'User''s token, got through loging-in with an email and a password'
+tags:
+  - name: Comments
+  - name: Devblogs
+  - name: Publications
+  - name: Users
