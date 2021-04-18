@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: BecauseOfProg API
   version: '2.0'
-  description: ''
+  description: Fetch all kind of information related to the BecauseOfProg
   license:
     name: MIT
     url: 'https://github.com/BecauseOfProg/api-definition/blob/master/LICENSE'
@@ -108,7 +108,7 @@ paths:
       responses:
         '204':
           description: No Content
-      description: "Edit the user's profile informations.\n\n\U0001F510 Authentication - `USER_WRITE` permission OR user himself"
+      description: "Edit the user's profile informations.\n\n\U0001F510 Authentication - `USER_WRITE` permission OR user theyselves"
       requestBody:
         content:
           application/json:
@@ -132,6 +132,8 @@ paths:
                   items:
                     $ref: '#/components/schemas/social'
       parameters: []
+      tags:
+        - Users
   '/users/{username}/permissions':
     parameters:
       - schema:
@@ -139,26 +141,6 @@ paths:
         name: username
         in: path
         required: true
-    get:
-      summary: Get user's permissions
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-      operationId: get-user-permissions
-      description: "Get the permissions a user has.\n\n\U0001F510 Authentication - `USER_WRITE` permission"
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: Authorization
-      tags:
-        - Users
     patch:
       summary: Edit user's permissions
       operationId: edit-user-permissions
@@ -187,6 +169,8 @@ paths:
                     type: string
               required:
                 - permissions
+      tags:
+        - Users
   /publications:
     get:
       summary: Get all publications
@@ -236,11 +220,13 @@ paths:
           description: search for publications written in a specific lang
     parameters: []
     post:
-      summary: Create publication
+      summary: Create a publication
       operationId: post-publication
       responses:
         '201':
           description: Created
+        '400':
+          description: Bad Request
         '401':
           description: Unauthorized
         '403':
@@ -274,6 +260,8 @@ paths:
                 - keywords
                 - illustration
                 - content
+      tags:
+        - Publications
   /auth:
     post:
       summary: Authenticate user
@@ -284,17 +272,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                  user:
-                    $ref: '#/components/schemas/user'
-                required:
-                  - token
-                  - user
+                $ref: '#/components/schemas/user'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
       operationId: post-auth
-      description: 'Get the token of a user, in order to interact with some parts of the API. To use authentication in requests that require it, add the `Authorization` header with your token inside.'
+      description: 'Get the token of a user, in order to interact with some parts of the API. To use authentication in requests that require it, add the `Authorization` header containing the token (inside returned data).'
       requestBody:
         content:
           application/json:
@@ -319,15 +303,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/user'
-                  permissions:
-                    type: array
-                    items:
-                      type: string
-      description: "Get the data of a user based on his token, to re-authenticate him.\n\n\U0001F510 Authentication"
+                $ref: '#/components/schemas/user'
+      description: "Get the data of a user based on his token, to re-authenticate him. Data includes the token.\n\n\U0001F510 Authentication"
       parameters: []
       tags:
         - Users
@@ -423,6 +400,34 @@ paths:
           in: query
           name: ip
           description: (only available with `USER_WRITE` permission) search by IP address
+    post:
+      summary: Submit a post
+      operationId: post-comments
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+      description: 'Submit, as a user, a comment on a post. Note that a moderator will have to validate the comment in order for it to be published.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: ''
+                email:
+                  type: string
+                  description: ''
+                content:
+                  type: string
+                  description: ''
+              required:
+                - username
+                - email
+                - content
   /devblogs:
     get:
       summary: Get all devblogs
@@ -455,12 +460,84 @@ paths:
           in: query
           name: author
           description: search for devblogs written by a specific author (using their username)
+    post:
+      summary: Create a devblog
+      operationId: post-devblogs
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      description: "Write a new devblog and publish it.\n\n\U0001F510 Authentication - `DEVBLOG_WRITE` permission"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                category:
+                  type: string
+                illustration:
+                  type: string
+                content:
+                  type: string
+              required:
+                - title
+                - category
+                - illustration
+                - content
+  '/devblogs/{slug}':
+    parameters:
+      - schema:
+          type: string
+        name: slug
+        in: path
+        required: true
+    get:
+      summary: Get one devblog
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/devblog'
+      operationId: get-devblogs-slug
+      description: Get a single devblog based on its slug.
+  '/publications/{slug}':
+    parameters:
+      - schema:
+          type: string
+        name: slug
+        in: path
+        required: true
+    get:
+      summary: Get one publication
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publication'
+      operationId: get-publications-slug
+      description: Get a single publication based on its slug.
 components:
   schemas:
     comment:
       title: Comment resource
       type: object
       description: 'Comments are made by readers on specific publications to give their opinion, suggest changes, give sources, interact with authors...'
+      x-tags:
+        - Comments
       properties:
         slug:
           type: string
@@ -468,6 +545,8 @@ components:
           maxLength: 32
         username:
           type: string
+          minLength: 2
+          maxLength: 32
         email:
           type: string
           maxLength: 64
@@ -506,8 +585,6 @@ components:
         - is_validated
         - pinned
         - timestamp
-      x-tags:
-        - Comments
     user:
       type: object
       title: User resource
@@ -586,6 +663,8 @@ components:
       title: Publication resource
       type: object
       description: 'Publications are created by redactors in the blog. They can be articles, tutorials and tips on various subjects such as informatic, development, etc...'
+      x-tags:
+        - Publications
       properties:
         slug:
           type: string
@@ -597,7 +676,8 @@ components:
           type: integer
           description: 'unix timestamp, post creation'
         author:
-          $ref: '#/components/schemas/user'
+          type: string
+          description: author's username
         type:
           type: string
           description: post's type
@@ -652,12 +732,12 @@ components:
         - keywords
         - illustration
         - locale
-      x-tags:
-        - Publications
     devblog:
       title: Devblog resource
       type: object
       description: 'Devblogs are created by BOP members and inform about the news around the team, the projects or anything else.'
+      x-tags:
+        - Devblogs
       properties:
         title:
           type: string
@@ -673,7 +753,8 @@ components:
           description: post's banner
           format: uri
         author:
-          $ref: '#/components/schemas/user'
+          type: string
+          description: author's username
         timestamp:
           type: integer
           description: "unix timestamp, post creation\t"
@@ -689,8 +770,6 @@ components:
         - illustration
         - author
         - timestamp
-      x-tags:
-        - Devblogs
   securitySchemes: {}
   responses:
     Error:
